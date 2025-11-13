@@ -3,6 +3,8 @@ package com.example.demo.constant;
 /* 錯誤代碼清單 */
 public class ErrorCode {
     public static final String UE001 = "UE001";
+
+    public static final String CU001 = "CU001";
     public static final String CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND";
     public static final String EMPLOYEE_NOT_FOUND = "EMPLOYEE_NOT_FOUND";
     public static final String PRODUCT_NOT_FOUND = "PRODUCT_NOT_FOUND";

@@ -149,8 +149,13 @@ public class OrderService {
     }
 
     // 刪除訂單
-    public void deleteOrder(Long orderId) {
-        orderRepository.deleteById(orderId);
+    public boolean deleteOrder(Long orderId) {
+        if (orderRepository.existsById(orderId)) {
+            orderRepository.deleteById(orderId);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // 多重查詢訂單

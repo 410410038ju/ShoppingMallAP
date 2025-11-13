@@ -26,7 +26,12 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public void deleteProduct(Long productId) {
-        productRepository.deleteById(productId);
+    public boolean deleteProduct(Long productId) {
+        if (productRepository.existsById(productId)) {
+            productRepository.deleteById(productId);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

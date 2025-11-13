@@ -40,9 +40,18 @@ public class CustomerService {
     }
 
     // 根據客戶ID刪除對應客戶資料，沒有回傳值
-    public void deleteCustomer(Long id) {
-        customerRepository.deleteById(id);
+//    public void deleteCustomer(Long id) {
+//        customerRepository.deleteById(id);
+//    }
+    public boolean deleteCustomer(Long id) {
+        if (customerRepository.existsById(id)) {
+            customerRepository.deleteById(id);
+            return true;
+        } else {
+            return false;
+        }
     }
+
 
     // 新增：DTO轉Entity並存新客戶
     public Customer createCustomer(CreateCustomerRequest dto) {

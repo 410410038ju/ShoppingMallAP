@@ -1,7 +1,9 @@
 package com.example.demo.service;
 
+import com.example.demo.model.OrderDetailId;
 import com.example.demo.model.ProductCategory;
 import com.example.demo.repository.ProductCategoryRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,10 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ProductCategoryService {
 
-    @Autowired
-    private ProductCategoryRepository repository;
+    private final ProductCategoryRepository repository;
 
     public List<ProductCategory> getAll() {
         return repository.findAll();
@@ -31,7 +33,15 @@ public class ProductCategoryService {
         return repository.save(category);
     }
 
-    public void delete(Long id) {
+   /*public void delete(Long id) {
         repository.deleteById(id);
-    }
+    }*/
+   public boolean delete(Long id) {
+       return repository.findById(id)
+               .map(existing -> {
+                   repository.deleteById(id);
+                   return true;
+               }).orElse(false);
+   }
+
 }

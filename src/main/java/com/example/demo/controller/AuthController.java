@@ -7,6 +7,7 @@ import com.example.demo.model.Employee;
 import com.example.demo.security.JwtUtil;
 import com.example.demo.service.CustomerService;
 import com.example.demo.service.EmployeeService;
+import com.example.demo.utils.SvcResModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class AuthController {
 
     @Operation(summary = "登入")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity<SvcResModel<LoginResponseDTO>> login(@RequestBody LoginRequestDTO loginRequest) {
         String identifier = loginRequest.getIdentifier();
         String password = loginRequest.getPassword();
 
@@ -44,7 +45,8 @@ public class AuthController {
                 Employee employee = employeeOpt.get();
                 if (passwordEncoder.matches(password, employee.getPassword())) {
                     String token = jwtUtil.generateToken(employee.getEmployeeId().toString(), "ROLE_EMPLOYEE");
-                    return ResponseEntity.ok(new LoginResponseDTO(token, "ROLE_EMPLOYEE"));
+                    LoginResponseDTO responseDTO = new LoginResponseDTO(token, "ROLE_EMPLOYEE");
+                    return ResponseEntity.ok(SvcResModel.success(responseDTO));
                 }
             }
         }
@@ -55,11 +57,14 @@ public class AuthController {
             Customer customer = customerOpt.get();
             if (passwordEncoder.matches(password, customer.getPassword())) {
                 String token = jwtUtil.generateToken(customer.getCustomerId().toString(), "ROLE_CUSTOMER");
-                return ResponseEntity.ok(new LoginResponseDTO(token, "ROLE_CUSTOMER"));
+                LoginResponseDTO responseDTO = new LoginResponseDTO(token, "ROLE_CUSTOMER");
+                return ResponseEntity.ok(SvcResModel.success(responseDTO));
             }
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("帳號或密碼錯誤");
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(SvcResModel.<LoginResponseDTO>error("帳號或密碼錯誤"));
     }
 }
 

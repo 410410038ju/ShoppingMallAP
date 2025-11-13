@@ -33,7 +33,12 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
-    public void deleteEmployee(Long employeeId) {
-        employeeRepository.deleteById(employeeId);
+    public boolean deleteEmployee(Long employeeId) {
+        if (employeeRepository.existsById(employeeId)) {
+            employeeRepository.deleteById(employeeId);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

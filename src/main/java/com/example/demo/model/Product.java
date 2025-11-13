@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import com.example.demo.constant.ProductStatus;
+import com.example.demo.constant.ProductStatusConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -32,10 +34,15 @@ public class Product {
     @NotNull
     @Min(0)
     private Integer stockQuantity; // 商品庫存數量
-
+/*
     @NotNull
     @Enumerated(EnumType.STRING)
     private Status status; // 商品狀態
+    */
+
+    @NotNull
+    @Convert(converter = ProductStatusConverter.class)
+    private ProductStatus status; // 商品狀態
 
     @Size(max = 500)
     private String description; // 商品描述
@@ -49,10 +56,10 @@ public class Product {
     @JsonIgnore
     @OneToMany(mappedBy = "product")
     private List<OrderDetail> orderDetails;
-
+/*
     public enum Status {
         上架, 下架
-    }
+    }*/
 
     @CreationTimestamp
     private LocalDateTime createdAt;  // 新增資料時自動記錄時間

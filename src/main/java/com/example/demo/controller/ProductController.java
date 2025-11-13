@@ -1,12 +1,16 @@
 package com.example.demo.controller;
 
+import com.example.demo.constant.ProductStatus;
 import com.example.demo.model.Product;
 import com.example.demo.dto.request.CreateProductRequest;
 import com.example.demo.service.ProductService;
+import com.example.demo.utils.SvcResModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,70 +28,72 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'CUSTOMER')")
     @GetMapping("/common/products")
     @Operation(summary = "取得所有商品")
-    public List<Product> getAll() {
-        return productService.getAllProducts();
+    public SvcResModel<List<Product>> getAll() {
+        List<Product> products = productService.getAllProducts();
+        return SvcResModel.success("取得所有商品", products);
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'CUSTOMER')")
     @Operation(summary = "根據ID取得商品資料")
     @GetMapping("/common/products/{productId}")
-    public Optional<Product> getById(@PathVariable Long productId) {
-        return productService.getProductById(productId);
+    public ResponseEntity<SvcResModel<Product>> getById(@PathVariable Long productId) {
+        return productService.getProductById(productId)
+                .map(product -> ResponseEntity.ok(SvcResModel.success("取得商品", product)))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(SvcResModel.error("找不到指定商品 ID: " + productId)));
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE')")
     @Operation(summary = "新增商品")
     @PostMapping("/employee/products")
-    public Product create(@RequestBody CreateProductRequest request) {
+    public SvcResModel<Product> create(@RequestBody CreateProductRequest request) {
         Product product = Product.builder()
                 .name(request.getName())
                 .price(request.getPrice())
                 .stockQuantity(request.getStockQuantity())
-                .status(Product.Status.valueOf(request.getStatus()))
+                .status(ProductStatus.getEnum(request.getStatus()))
                 .description(request.getDescription())
                 .category(request.getCategory())
                 .imageUrl(request.getImageUrl())
                 .build();
 
-        return productService.saveProduct(product);
+        return SvcResModel.success("新增商品成功", productService.saveProduct(product));
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE')")
     @Operation(summary = "更新商品")
     @PutMapping("/employee/products/{productId}")
-    public Product update(
+    public ResponseEntity<SvcResModel<Product>> update(
             @PathVariable Long productId,
             @Valid @RequestBody CreateProductRequest request) {
 
-        Optional<Product> optionalProduct = productService.getProductById(productId);
+        return productService.getProductById(productId)
+                .map(existing -> {
+                    existing.setName(request.getName());
+                    existing.setPrice(request.getPrice());
+                    existing.setStockQuantity(request.getStockQuantity());
+                    existing.setStatus(ProductStatus.getEnum(request.getStatus()));
+                    existing.setDescription(request.getDescription());
+                    existing.setCategory(request.getCategory());
+                    existing.setImageUrl(request.getImageUrl());
 
-        if(optionalProduct.isEmpty()) {
-            throw new RuntimeException("商品不存在");
-        }
-
-//        if (optionalProduct.isEmpty()) {
-//            throw new ResourceNotFoundException("找不到指定的商品 ID: " + productId);
-//        }
-
-
-        Product product = optionalProduct.get();
-
-        // 將可更新欄位從 request 複製到 entity
-        product.setName(request.getName());
-        product.setPrice(request.getPrice());
-        product.setStockQuantity(request.getStockQuantity());
-        product.setStatus(Product.Status.valueOf(request.getStatus()));
-        product.setDescription(request.getDescription());
-        product.setCategory(request.getCategory());
-        product.setImageUrl(request.getImageUrl());
-
-        return productService.saveProduct(product);
+                    Product updated = productService.saveProduct(existing);
+                    return ResponseEntity.ok(SvcResModel.success("更新商品成功", updated));
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(SvcResModel.error("找不到指定商品 ID: " + productId)));
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE')")
     @Operation(summary = "刪除商品")
     @DeleteMapping("/employee/products/{productId}")
-    public void delete(@PathVariable Long productId) {
-        productService.deleteProduct(productId);
+    public ResponseEntity<SvcResModel<Object>> delete(@PathVariable Long productId) {
+        boolean deleted = productService.deleteProduct(productId);
+        if (deleted) {
+            return ResponseEntity.ok(SvcResModel.success("刪除商品成功", null));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(SvcResModel.error("找不到指定商品 ID: " + productId));
+        }
     }
 }
