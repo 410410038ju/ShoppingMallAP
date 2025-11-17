@@ -1,10 +1,13 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.CreateEmployeeRequest;
+import com.example.demo.dto.request.UpdateEmployeeRequest;
 import com.example.demo.model.Employee;
 import com.example.demo.service.EmployeeService;
 import com.example.demo.utils.SvcResModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -43,18 +46,32 @@ public class EmployeeController {
 
     @Operation(summary = "新增員工")
     @PostMapping
-    public ResponseEntity<SvcResModel<Employee>> create(@RequestBody Employee employee) {
-        Employee savedEmployee = employeeService.saveEmployee(employee);
+    public ResponseEntity<SvcResModel<Employee>> create(
+            @RequestBody @Valid CreateEmployeeRequest request) {
+        Employee employee = new Employee();
+        employee.setEmployeeId(request.getEmployeeId());
+        employee.setName(request.getName());
+        employee.setPassword(request.getPassword());
+
+        Employee savedEmployee = employeeService.saveEmployee(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SvcResModel.success(savedEmployee));
     }
 
     @Operation(summary = "更新員工")
     @PutMapping("/{employeeId}")
-    public ResponseEntity<SvcResModel<Employee>> update(@PathVariable Long employeeId,
+    /*public ResponseEntity<SvcResModel<Employee>> update(@PathVariable Long employeeId,
                                                         @RequestBody Employee employee) {
         employee.setEmployeeId(employeeId);
         Employee updatedEmployee = employeeService.saveEmployee(employee);
+        return ResponseEntity.ok(SvcResModel.success(updatedEmployee));
+    }*/
+    public ResponseEntity<SvcResModel<Employee>> update(
+            @PathVariable Long employeeId,
+            @RequestBody @Valid UpdateEmployeeRequest request) {
+
+        Employee updatedEmployee = employeeService.updateEmployee(employeeId, request);
+
         return ResponseEntity.ok(SvcResModel.success(updatedEmployee));
     }
 
