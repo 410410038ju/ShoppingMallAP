@@ -47,8 +47,13 @@ public class Product {
     @Size(max = 500)
     private String description; // 商品描述
 
-    @NotBlank
-    private String category; // 商品類別
+//    @NotBlank
+//    private String category;
+    // 關聯 ProductCategory
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private ProductCategory category; // 商品類別
 
     @Size(max = 255)
     private String imageUrl; // 圖片網址

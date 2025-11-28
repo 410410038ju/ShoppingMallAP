@@ -5,6 +5,15 @@ public class ErrorCode {
     public static final String UE001 = "UE001";
 
     public static final String CU001 = "CU001";
+
+    // 商品 Product
+    public static final String PR001 = "PR001"; // 找不到商品
+
+    // 商品類別 ProductCategory
+    public static final String PC001 = "PC001"; // 找不到商品類別
+    public static final String PC002 = "PC002"; // 該商品類別已存在，請勿重複命名
+
+
     public static final String CUSTOMER_NOT_FOUND = "CUSTOMER_NOT_FOUND";
     public static final String EMPLOYEE_NOT_FOUND = "EMPLOYEE_NOT_FOUND";
     public static final String PRODUCT_NOT_FOUND = "PRODUCT_NOT_FOUND";

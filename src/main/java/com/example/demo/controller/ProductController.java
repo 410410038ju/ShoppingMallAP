@@ -3,6 +3,9 @@ package com.example.demo.controller;
 import com.example.demo.constant.ProductStatus;
 import com.example.demo.model.Product;
 import com.example.demo.dto.request.CreateProductRequest;
+import com.example.demo.model.ProductCategory;
+import com.example.demo.msg.ProductCategoryMsg;
+import com.example.demo.service.ProductCategoryService;
 import com.example.demo.service.ProductService;
 import com.example.demo.utils.SvcResModel;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,13 +27,14 @@ import java.util.Optional;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductCategoryService productCategoryService;
 
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'CUSTOMER')")
     @GetMapping("/common/products")
     @Operation(summary = "取得所有商品")
     public SvcResModel<List<Product>> getAll() {
         List<Product> products = productService.getAllProducts();
-        return SvcResModel.success("取得所有商品", products);
+        return SvcResModel.success("取得所有商品成功", products);
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'CUSTOMER')")
@@ -38,7 +42,7 @@ public class ProductController {
     @GetMapping("/common/products/{productId}")
     public ResponseEntity<SvcResModel<Product>> getById(@PathVariable Long productId) {
         return productService.getProductById(productId)
-                .map(product -> ResponseEntity.ok(SvcResModel.success("取得商品", product)))
+                .map(product -> ResponseEntity.ok(SvcResModel.success("取得商品成功", product)))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(SvcResModel.error("找不到指定商品 ID: " + productId)));
     }
@@ -46,18 +50,19 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('EMPLOYEE')")
     @Operation(summary = "新增商品")
     @PostMapping("/employee/products")
-    public SvcResModel<Product> create(@RequestBody CreateProductRequest request) {
+    public ResponseEntity<SvcResModel<Product>> create(@Valid @RequestBody CreateProductRequest request) {
+
         Product product = Product.builder()
                 .name(request.getName())
                 .price(request.getPrice())
                 .stockQuantity(request.getStockQuantity())
                 .status(ProductStatus.getEnum(request.getStatus()))
                 .description(request.getDescription())
-                .category(request.getCategory())
                 .imageUrl(request.getImageUrl())
                 .build();
 
-        return SvcResModel.success("新增商品成功", productService.saveProduct(product));
+        Product saved = productService.saveProduct(product, request.getCategoryId());
+        return ResponseEntity.ok(SvcResModel.success("新增商品成功", saved));
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE')")
@@ -74,10 +79,9 @@ public class ProductController {
                     existing.setStockQuantity(request.getStockQuantity());
                     existing.setStatus(ProductStatus.getEnum(request.getStatus()));
                     existing.setDescription(request.getDescription());
-                    existing.setCategory(request.getCategory());
                     existing.setImageUrl(request.getImageUrl());
 
-                    Product updated = productService.saveProduct(existing);
+                    Product updated = productService.saveProduct(existing, request.getCategoryId());
                     return ResponseEntity.ok(SvcResModel.success("更新商品成功", updated));
                 })
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)

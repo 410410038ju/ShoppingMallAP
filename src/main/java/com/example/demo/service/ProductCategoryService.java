@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.OrderDetailId;
 import com.example.demo.model.ProductCategory;
 import com.example.demo.repository.ProductCategoryRepository;
+import com.example.demo.dto.request.CreateProductCategoryRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,10 @@ public class ProductCategoryService {
         return repository.findById(id);
     }
 
-    public ProductCategory create(ProductCategory category) {
+    // 新增商品類別
+    public ProductCategory create(CreateProductCategoryRequest request) {
+        ProductCategory category = new ProductCategory();
+        category.setName(request.getName());
         return repository.save(category);
     }
 
@@ -33,9 +37,6 @@ public class ProductCategoryService {
         return repository.save(category);
     }
 
-   /*public void delete(Long id) {
-        repository.deleteById(id);
-    }*/
    public boolean delete(Long id) {
        return repository.findById(id)
                .map(existing -> {

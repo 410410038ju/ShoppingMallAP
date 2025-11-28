@@ -1,10 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.CreateProductCategoryRequest;
 import com.example.demo.model.ProductCategory;
 import com.example.demo.service.ProductCategoryService;
 import com.example.demo.utils.SvcResModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,8 +41,9 @@ public class ProductCategoryController {
 
     @Operation(summary = "新增商品類別")
     @PostMapping
-    public ResponseEntity<SvcResModel<ProductCategory>> create(@RequestBody ProductCategory category) {
-        ProductCategory saved = service.create(category);
+    public ResponseEntity<SvcResModel<ProductCategory>> create(
+            @Valid @RequestBody CreateProductCategoryRequest request) {
+        ProductCategory saved = service.create(request);
         return ResponseEntity.ok(SvcResModel.success(saved));
     }
 
